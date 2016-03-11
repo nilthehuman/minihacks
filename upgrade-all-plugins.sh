@@ -36,7 +36,7 @@ for plugin in $BUNDLEDIR/*/; do
         printf "$FORMAT" ${plugin::-1}
     fi
     cd $plugin
-    git pull
+    git pull --no-stat
     cd ..
 done
 
