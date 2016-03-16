@@ -14,6 +14,7 @@ if [[ $? != 0 ]]; then
     echo "You don't seem to have git installed."
     read -p "Install it now? (Y/n) " USERINPUT
     if [ "$USERINPUT" != "Y" ]; then
+        unset BUNDLEDIR USERINPUT
         echo "Abort."
         exit 0;
     fi
@@ -39,6 +40,8 @@ for plugin in $BUNDLEDIR/*/; do
     git pull --no-stat
     cd ..
 done
+
+unset BUNDLEDIR USERINPUT MAX_PLUGIN_LENGTH FORMAT plugin
 
 echo "Done."
 
