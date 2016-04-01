@@ -4,6 +4,10 @@
 
 BUNDLEDIR="$HOME/.vim/bundle"
 until [[ -d "$BUNDLEDIR" ]]; do
+    if [[ ! -t 0 ]]; then
+        # non-interactive shell
+        exit 1;
+    fi
     echo "$BUNDLEDIR does not exist. Where do you keep your plugins?"
     read -p "BUNDLEDIR = " BUNDLEDIR
     BUNDLEDIR=`echo $BUNDLEDIR | sed s#~#\$HOME#g`
@@ -11,6 +15,10 @@ done
 
 which git 1> /dev/null
 if [[ $? != 0 ]]; then
+    if [[ ! -t 0 ]]; then
+        # non-interactive shell
+        exit 2;
+    fi
     echo "You don't seem to have git installed."
     read -p "Install it now? (Y/n) " USERINPUT
     if [ "$USERINPUT" != "Y" ]; then
