@@ -38,7 +38,7 @@ done
 ((MAX_PLUGIN_LENGTH--))
 FORMAT="Upgrading %-${MAX_PLUGIN_LENGTH}s: "
 
-STARTING_PWD=$PWD
+pushd . > /dev/null
 for plugin in $BUNDLEDIR/*/; do
     if [ "$BASH_VERSINFO" -lt 4 ]; then
         printf "$FORMAT" $plugin
@@ -49,9 +49,9 @@ for plugin in $BUNDLEDIR/*/; do
     git pull --no-stat
     cd ..
 done
-cd $STARTING_PWD
+popd > /dev/null
 
-unset BUNDLEDIR USERINPUT MAX_PLUGIN_LENGTH FORMAT STARTING_PWD plugin
+unset BUNDLEDIR USERINPUT MAX_PLUGIN_LENGTH FORMAT plugin
 
 echo "Done."
 
