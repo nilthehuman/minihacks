@@ -20,8 +20,8 @@ if [[ $? != 0 ]]; then
         exit 2;
     fi
     echo "You don't seem to have git installed."
-    read -p "Install it now? (Y/n) " USERINPUT
-    if [ "$USERINPUT" != "Y" ]; then
+    read -p "Install it now? (y/N) " USERINPUT
+    if [ "$USERINPUT" != "y" ]; then
         unset BUNDLEDIR USERINPUT
         echo "Abort."
         exit 0;
