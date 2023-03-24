@@ -65,7 +65,7 @@ bimap f g r = Range { bottom = f . bottom $ r,
                       top    = g . top    $ r }
 
 printState :: State Range (IO ())
-printState = S.get >>= pure . putStrLn . show
+printState = putStrLn . show <$> S.get
 
 -- lift is to MonadTrans what return is to Monad, I think
 printStateT :: StateT Range IO ()
