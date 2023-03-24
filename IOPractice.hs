@@ -2,10 +2,14 @@
 
 {-# LANGUAGE TupleSections, LambdaCase #-}
 
+import Control.Applicative ( liftA2 )
 import Control.Arrow
+import Control.Concurrent ( forkIO, threadDelay )
+import Control.Monad.Loops
 import Control.Monad.State as S
 import Control.Monad.Trans.State as T
-import Data.Function ( fix )
+import Data.Function ( fix, (&) )
+import System.Clock ( Clock(Realtime), getTime, sec, TimeSpec )
 import System.IO ( BufferMode(NoBuffering), hSetBuffering, hSetEcho, stdin )
 import Text.Read ( readMaybe )
 
@@ -16,9 +20,12 @@ main :: IO ()
 --main = hSetBuffering stdin NoBuffering >>
 --       hSetEcho stdin False >>
 --       evalStateT ropeWalk (ropeLength `div` 2)
-main = hSetBuffering stdin NoBuffering >>
-       hSetEcho stdin False >>
-       loopStateIO ropeWalk' (ropeLength `div` 2)
+--main = hSetBuffering stdin NoBuffering >>
+--       hSetEcho stdin False >>
+--       loopStateIO' ropeWalk' (ropeLength `div` 2)
+--main = loopStateIO tickTickBoom (TimeSpec 0 0, -1)
+--main = loopStateIO' tickTickBoom (TimeSpec 0 0, -1)
+main = tickTickBoom' 0
 
 guess :: Int -> IO ()
 guess n = fmap readMaybe ask >>= check
@@ -51,7 +58,7 @@ seek bottom top = prompt >> getLine >>= react
 data Range = Range {
     bottom :: Int,
     top    :: Int
-} deriving Show
+} deriving (Eq, Show)
 
 bimap :: (Int -> Int) -> (Int -> Int) -> Range -> Range
 bimap f g r = Range { bottom = f . bottom $ r,
@@ -116,6 +123,10 @@ loopStateIO :: StateT s IO Bool -> s -> IO ()
 loopStateIO f s = runStateT f s >>= \case (True, s') -> loopStateIO f s'
                                           (_   , s') -> pure ()
 
+-- hey, look at that, even cleaner!
+loopStateIO' :: Monad m => StateT s m Bool -> s -> m ()
+loopStateIO' = fmap void . runStateT . iterateUntil not
+
 showRope :: Int -> IO ()
 showRope n = putStr $ "\r" <> replicate tilesLeft '_' <> "#" <> replicate tilesRight '_'
     where tilesLeft  = n
@@ -133,3 +144,19 @@ ropeWalk' = do
     if key == 'q' || key == 'Q' || n < 0 || n >= ropeLength
         then pure False
         else pure True
+
+
+tickTickBoom :: StateT (TimeSpec, Int) IO Bool
+tickTickBoom = do
+    (time, n) <- T.get
+    time' <- liftIO $ getTime Realtime
+    when (sec time < sec time') (T.modify $ second (+1))
+    liftIO $ showRope n
+    T.modify . first . const $ time'
+    if n >= ropeLength then (liftIO . putStrLn $ "\nBoom!") >> pure False
+                       else pure True
+
+tickTickBoom' :: Int -> IO ()
+tickTickBoom' n = if n >= ropeLength then putStrLn $ "\nBoom!"
+                                     else (showRope n >>) $ void . forkIO $
+                                          threadDelay 1000000 >> tickTickBoom' (succ n)
