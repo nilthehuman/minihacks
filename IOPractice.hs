@@ -127,7 +127,7 @@ loopStateIO f s = runStateT f s >>= \case (True, s') -> loopStateIO f s'
 
 -- hey, look at that, even cleaner!
 loopStateIO' :: Monad m => StateT s m Bool -> s -> m ()
-loopStateIO' = fmap void . runStateT . iterateUntil not
+loopStateIO' = fmap void . runStateT . iterateWhile id
 
 showRope :: Int -> IO ()
 showRope n = putStr $ "\r" <> replicate tilesLeft '_' <> "#" <> replicate tilesRight '_'
