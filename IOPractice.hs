@@ -9,7 +9,9 @@ import Control.Monad.Loops
 import Control.Monad.State as S
 import Control.Monad.Trans.State as T
 import Data.Function ( fix, (&) )
-import System.Clock ( Clock(Realtime), getTime, sec, TimeSpec )
+import System.Clock
+-- this does not seem to work for some reason:
+-- import System.Clock ( Clock(Realtime), getTime, sec, TimeSpec )
 import System.IO ( BufferMode(NoBuffering), hSetBuffering, hSetEcho, stdin )
 import Text.Read ( readMaybe )
 
